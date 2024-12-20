@@ -1960,17 +1960,19 @@ void WaveshareEPaper4P2InBV2::initialize() {
 }
 
 void HOT WaveshareEPaper4P2InBV2::display() {
+  const size_t buf_len = this->get_buffer_length_() / 2u;
+
   // COMMAND DATA START TRANSMISSION 1 (B/W data)
   this->command(0x10);
   this->start_data_();
-  this->write_array(this->buffer_, this->get_buffer_length_());
+  this->write_array(this->buffer_, buf_len);
   this->end_data_();
+  delay(2);
 
   // COMMAND DATA START TRANSMISSION 2 (RED data)
   this->command(0x13);
   this->start_data_();
-  for (size_t i = 0; i < this->get_buffer_length_(); i++)
-    this->write_byte(0xFF);
+  this->write_array(this->buffer_ + buf_len, buf_len);
   this->end_data_();
   delay(2);
 
