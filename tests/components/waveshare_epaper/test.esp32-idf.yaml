@@ -138,6 +138,7 @@ display:
       number: GPIO32
     lambda: |-
       auto const red = Color(255, 0, 0);
-      it.rectangle(0, 0, it.get_width() / 2, it.get_height() / 2);
-      it.rectangle(it.get_width() / 2, it.get_height() / 2, it.get_width(), it.get_height(), red);
+      it.filled_rectangle(                 0,                   0, it.get_width() / 2,     it.get_height(), COLOR_ON);
+      it.filled_rectangle(it.get_width() / 2,                   0, it.get_width() / 2,     it.get_height(), COLOR_OFF);
+      it.filled_rectangle(                 0, it.get_height() / 2,     it.get_width(), it.get_height() / 2, red);
 
