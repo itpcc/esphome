@@ -1960,22 +1960,17 @@ void WaveshareEPaper4P2InBV2::initialize() {
 }
 
 void HOT WaveshareEPaper4P2InBV2::display() {
-  const uint32_t buf_half_len = this->get_buffer_length_() / 2u;
-
   // COMMAND DATA START TRANSMISSION 1 (B/W data)
   this->command(0x10);
   this->start_data_();
-  for (size_t i = 0; i < buf_half_len; i++) {
-    this->data(this->buffer_[i]);
-  }
+  this->write_array(this->buffer_, this->get_buffer_length_());
   this->end_data_();
 
   // COMMAND DATA START TRANSMISSION 2 (RED data)
   this->command(0x13);
   this->start_data_();
-  for (size_t i = 0; i < buf_half_len; i++) {
-    this->data(this->buffer_[i + buf_half_len]);
-  }
+  for (size_t i = 0; i < this->get_buffer_length_(); i++)
+    this->write_byte(0xFF);
   this->end_data_();
   delay(2);
 
@@ -2022,19 +2017,20 @@ void WaveshareEPaper4P2InBV2BWR::initialize() {
 }
 
 void HOT WaveshareEPaper4P2InBV2BWR::display() {
-  // COMMAND DATA START TRANSMISSION 1 (B/W data)
-  this->command(0x10);
-  this->start_data_();
-  this->write_array(this->buffer_, this->get_buffer_length_());
-  this->end_data_();
+  const uint32_t buf_len = this->get_buffer_length_() / 2u;
 
-  // COMMAND DATA START TRANSMISSION 2 (RED data)
-  this->command(0x13);
-  this->start_data_();
-  for (size_t i = 0; i < this->get_buffer_length_(); i++)
-    this->write_byte(0xFF);
-  this->end_data_();
-  delay(2);
+  this->command(0x10);  // Send BW data Transmission
+  delay(2);             // Delay to prevent Watchdog error
+  for (uint32_t i = 0; i < buf_len; ++i) {
+    this->data(this->buffer_[i]);
+  }
+
+  this->command(0x13);  // Send red data Transmission
+  delay(2);             // Delay to prevent Watchdog error
+  for (uint32_t i = 0; i < buf_len; ++i) {
+    // Red color need to flip bit from the buffer. Otherwise, red will conqure the screen!
+    this->data(~this->buffer_[buf_len + i]);
+  }
 
   // COMMAND DISPLAY REFRESH
   this->command(0x12);
